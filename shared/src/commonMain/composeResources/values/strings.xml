@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Kriptan</string>
+    <string name="language_code">EN</string>
+    <string name="toggle_theme">Switch theme</string>
+    <string name="back">Back</string>
+    <string name="header_coin">Coin / Volume</string>
+    <string name="header_price">Price</string>
+    <string name="header_change">24h change</string>
+    <string name="rank">Rank #%1$s</string>
+    <string name="section_market">Market</string>
+    <string name="market_cap">Market cap</string>
+    <string name="volume_24h">24h volume</string>
+    <string name="high_24h">24h high</string>
+    <string name="low_24h">24h low</string>
+    <string name="all_time_high">All-time high</string>
+    <string name="section_supply">Supply</string>
+    <string name="circulating_supply">Circulating</string>
+    <string name="total_supply">Total</string>
+    <string name="max_supply">Max</string>
+    <string name="last_updated">Updated %1$s</string>
+    <string name="coin_not_found">Coin not found</string>
+</resources>

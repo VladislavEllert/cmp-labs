@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Kriptan</string>
+    <string name="language_code">RU</string>
+    <string name="toggle_theme">Сменить тему</string>
+    <string name="back">Назад</string>
+    <string name="header_coin">Монета / Объём</string>
+    <string name="header_price">Цена</string>
+    <string name="header_change">Изм. за 24ч</string>
+    <string name="rank">Ранг #%1$s</string>
+    <string name="section_market">Рынок</string>
+    <string name="market_cap">Капитализация</string>
+    <string name="volume_24h">Объём за 24ч</string>
+    <string name="high_24h">Максимум за 24ч</string>
+    <string name="low_24h">Минимум за 24ч</string>
+    <string name="all_time_high">Исторический максимум</string>
+    <string name="section_supply">Предложение</string>
+    <string name="circulating_supply">В обращении</string>
+    <string name="total_supply">Всего выпущено</string>
+    <string name="max_supply">Максимум</string>
+    <string name="last_updated">Обновлено %1$s</string>
+    <string name="coin_not_found">Монета не найдена</string>
+</resources>
