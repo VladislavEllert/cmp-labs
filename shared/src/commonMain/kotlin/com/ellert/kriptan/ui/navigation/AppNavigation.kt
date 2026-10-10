@@ -4,25 +4,24 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.ellert.kriptan.domain.CoinRepository
 import com.ellert.kriptan.ui.detail.CoinDetailScreen
 import com.ellert.kriptan.ui.list.CoinListScreen
+import com.ellert.kriptan.ui.list.CoinListViewModel
 
 @Composable
 fun AppNavigation(
     backStack: SnapshotStateList<Route>,
     repository: CoinRepository,
     isDarkTheme: Boolean,
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
     onToggleTheme: () -> Unit,
     onToggleLanguage: () -> Unit,
 ) {
-    val coins = remember(repository) { repository.getCoins() }
+    val listViewModel = viewModel { CoinListViewModel(repository) }
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
@@ -38,10 +37,9 @@ fun AppNavigation(
         entryProvider = entryProvider {
             entry<Route.CoinList> {
                 CoinListScreen(
-                    coins = coins,
+                    state = listViewModel.state,
                     isDarkTheme = isDarkTheme,
-                    searchQuery = searchQuery,
-                    onSearchQueryChange = onSearchQueryChange,
+                    onSearchQueryChange = listViewModel::onSearchQueryChange,
                     onCoinClick = { coinId -> backStack.add(Route.CoinDetail(coinId)) },
                     onToggleTheme = onToggleTheme,
                     onToggleLanguage = onToggleLanguage,

@@ -46,18 +46,13 @@ import org.jetbrains.compose.resources.stringResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoinListScreen(
-    coins: List<Coin>,
+    state: CoinListState,
     isDarkTheme: Boolean,
-    searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onCoinClick: (String) -> Unit,
     onToggleTheme: () -> Unit,
     onToggleLanguage: () -> Unit,
 ) {
-    val query = searchQuery.trim()
-    val foundCoins = coins.filter {
-        it.name.contains(query, ignoreCase = true) || it.symbol.contains(query, ignoreCase = true)
-    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -79,13 +74,13 @@ fun CoinListScreen(
         },
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            SearchField(query = searchQuery, onQueryChange = onSearchQueryChange)
-            if (foundCoins.isEmpty()) {
+            SearchField(query = state.searchQuery, onQueryChange = onSearchQueryChange)
+            if (state.foundCoins.isEmpty()) {
                 NothingFound()
             } else {
                 LazyColumn {
                     item { ListHeader() }
-                    items(foundCoins, key = { it.id }) { coin ->
+                    items(state.foundCoins, key = { it.id }) { coin ->
                         CoinRow(coin = coin, onClick = { onCoinClick(coin.id) })
                     }
                 }
