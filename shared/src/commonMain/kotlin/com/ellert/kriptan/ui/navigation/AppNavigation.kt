@@ -17,6 +17,8 @@ fun AppNavigation(
     backStack: SnapshotStateList<Route>,
     repository: CoinRepository,
     isDarkTheme: Boolean,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onToggleTheme: () -> Unit,
     onToggleLanguage: () -> Unit,
 ) {
@@ -38,6 +40,8 @@ fun AppNavigation(
                 CoinListScreen(
                     coins = coins,
                     isDarkTheme = isDarkTheme,
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = onSearchQueryChange,
                     onCoinClick = { coinId -> backStack.add(Route.CoinDetail(coinId)) },
                     onToggleTheme = onToggleTheme,
                     onToggleLanguage = onToggleLanguage,

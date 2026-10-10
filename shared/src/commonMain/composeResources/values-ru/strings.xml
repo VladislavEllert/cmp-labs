@@ -3,6 +3,8 @@
     <string name="language_code">RU</string>
     <string name="toggle_theme">Сменить тему</string>
     <string name="back">Назад</string>
+    <string name="search_hint">Поиск по названию или тикеру</string>
+    <string name="nothing_found">Ничего не найдено</string>
     <string name="header_coin">Монета / Объём</string>
     <string name="header_price">Цена</string>
     <string name="header_change">Изм. за 24ч</string>

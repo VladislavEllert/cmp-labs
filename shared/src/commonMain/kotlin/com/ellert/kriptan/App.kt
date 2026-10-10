@@ -20,6 +20,7 @@ fun App() {
     val backStack = remember { mutableStateListOf<Route>(Route.CoinList) }
     var isDarkTheme by remember { mutableStateOf(true) }
     var language by remember { mutableStateOf("ru") }
+    var searchQuery by remember { mutableStateOf("") }
 
     CompositionLocalProvider(LocalAppLocale provides language) {
         // Resources read the locale once per composition, so a new language needs a fresh subtree.
@@ -29,6 +30,8 @@ fun App() {
                     backStack = backStack,
                     repository = repository,
                     isDarkTheme = isDarkTheme,
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { searchQuery = it },
                     onToggleTheme = { isDarkTheme = !isDarkTheme },
                     onToggleLanguage = { language = if (language == "ru") "en" else "ru" },
                 )

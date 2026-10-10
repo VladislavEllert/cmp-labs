@@ -13,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +37,8 @@ import kriptan.shared.generated.resources.header_price
 import kriptan.shared.generated.resources.ic_dark_mode
 import kriptan.shared.generated.resources.ic_light_mode
 import kriptan.shared.generated.resources.language_code
+import kriptan.shared.generated.resources.nothing_found
+import kriptan.shared.generated.resources.search_hint
 import kriptan.shared.generated.resources.toggle_theme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -45,10 +48,16 @@ import org.jetbrains.compose.resources.stringResource
 fun CoinListScreen(
     coins: List<Coin>,
     isDarkTheme: Boolean,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onCoinClick: (String) -> Unit,
     onToggleTheme: () -> Unit,
     onToggleLanguage: () -> Unit,
 ) {
+    val query = searchQuery.trim()
+    val foundCoins = coins.filter {
+        it.name.contains(query, ignoreCase = true) || it.symbol.contains(query, ignoreCase = true)
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,13 +78,45 @@ fun CoinListScreen(
             )
         },
     ) { padding ->
-        LazyColumn(contentPadding = padding) {
-            item { ListHeader() }
-            items(coins, key = { it.id }) { coin ->
-                CoinRow(coin = coin, onClick = { onCoinClick(coin.id) })
+        Column(modifier = Modifier.padding(padding)) {
+            SearchField(query = searchQuery, onQueryChange = onSearchQueryChange)
+            if (foundCoins.isEmpty()) {
+                NothingFound()
+            } else {
+                LazyColumn {
+                    item { ListHeader() }
+                    items(foundCoins, key = { it.id }) { coin ->
+                        CoinRow(coin = coin, onClick = { onCoinClick(coin.id) })
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text(stringResource(Res.string.search_hint)) },
+        singleLine = true,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimens.SpacingLarge, vertical = Dimens.SpacingSmall),
+    )
+}
+
+@Composable
+private fun NothingFound() {
+    Text(
+        text = stringResource(Res.string.nothing_found),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(Dimens.SpacingLarge),
+    )
 }
 
 @Composable
