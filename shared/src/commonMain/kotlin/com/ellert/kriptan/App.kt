@@ -2,13 +2,16 @@ package com.ellert.kriptan
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.ellert.kriptan.data.MockCoinRepository
+import com.ellert.kriptan.data.NetworkCoinRepository
+import com.ellert.kriptan.data.network.CoinGeckoApi
+import com.ellert.kriptan.data.network.createHttpClient
 import com.ellert.kriptan.ui.locale.LocalAppLocale
 import com.ellert.kriptan.ui.navigation.AppNavigation
 import com.ellert.kriptan.ui.navigation.Route
@@ -16,7 +19,10 @@ import com.ellert.kriptan.ui.theme.KriptanTheme
 
 @Composable
 fun App() {
-    val repository = remember { MockCoinRepository() }
+    // One client for the whole app: its connection pool is reused by every request.
+    val httpClient = remember { createHttpClient(BuildKonfig.COINGECKO_BASE_URL) }
+    DisposableEffect(httpClient) { onDispose { httpClient.close() } }
+    val repository = remember { NetworkCoinRepository(CoinGeckoApi(httpClient)) }
     val backStack = remember { mutableStateListOf<Route>(Route.CoinList) }
     var isDarkTheme by remember { mutableStateOf(true) }
     var language by remember { mutableStateOf("ru") }

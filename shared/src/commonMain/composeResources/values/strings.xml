@@ -21,4 +21,11 @@
     <string name="max_supply">Max</string>
     <string name="last_updated">Updated %1$s</string>
     <string name="coin_not_found">Coin not found</string>
+    <string name="retry">Retry</string>
+    <string name="error_no_connection">No connection to the server. Check the network and try again.</string>
+    <string name="error_timeout">The server is taking too long to respond.</string>
+    <string name="error_too_many_requests">Too many requests to CoinGecko. Wait a minute and try again.</string>
+    <string name="error_server">Server error (%1$s).</string>
+    <string name="error_bad_response">The server sent data in an unexpected format.</string>
+    <string name="section_about">About</string>
 </resources>

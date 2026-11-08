@@ -2,13 +2,17 @@ package com.ellert.kriptan.ui.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.ellert.kriptan.domain.Coin
 import com.ellert.kriptan.ui.common.ChangePill
 import com.ellert.kriptan.ui.common.CoinAvatar
+import com.ellert.kriptan.ui.common.LoadErrorView
 import com.ellert.kriptan.ui.format.formatCompact
 import com.ellert.kriptan.ui.format.formatPrice
 import com.ellert.kriptan.ui.theme.Dimens
@@ -50,6 +59,8 @@ fun CoinListScreen(
     isDarkTheme: Boolean,
     onSearchQueryChange: (String) -> Unit,
     onCoinClick: (String) -> Unit,
+    onLoadMore: () -> Unit,
+    onRetry: () -> Unit,
     onToggleTheme: () -> Unit,
     onToggleLanguage: () -> Unit,
 ) {
@@ -73,21 +84,58 @@ fun CoinListScreen(
             )
         },
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            SearchField(query = state.searchQuery, onQueryChange = onSearchQueryChange)
-            if (state.foundCoins.isEmpty()) {
-                NothingFound()
-            } else {
-                LazyColumn {
-                    item { ListHeader() }
-                    items(state.foundCoins, key = { it.id }) { coin ->
-                        CoinRow(coin = coin, onClick = { onCoinClick(coin.id) })
+        Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            when (state) {
+                CoinListState.Loading -> CircularProgressIndicator()
+                is CoinListState.Error -> LoadErrorView(state.error, onRetry)
+                is CoinListState.Success -> Column(modifier = Modifier.fillMaxSize()) {
+                    SearchField(query = state.searchQuery, onQueryChange = onSearchQueryChange)
+                    if (state.foundCoins.isEmpty()) {
+                        NothingFound()
+                    } else {
+                        CoinList(state, onCoinClick, onLoadMore)
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+private fun CoinList(state: CoinListState.Success, onCoinClick: (String) -> Unit, onLoadMore: () -> Unit) {
+    val listState = rememberLazyListState()
+    // The list only reports that the end is near; the ViewModel decides which page to load.
+    val isNearEnd by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            // Before the first layout there are no visible items, which is not "near the end".
+            val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: return@derivedStateOf false
+            lastVisible >= layoutInfo.totalItemsCount - LOAD_MORE_THRESHOLD
+        }
+    }
+    LaunchedEffect(isNearEnd, state.foundCoins.size) {
+        if (isNearEnd) onLoadMore()
+    }
+    LazyColumn(state = listState) {
+        item { ListHeader() }
+        items(state.foundCoins, key = { it.id }) { coin ->
+            CoinRow(coin = coin, onClick = { onCoinClick(coin.id) })
+        }
+        if (state.isLoadingMore || state.loadMoreError != null) {
+            item { LoadMoreFooter(state, onLoadMore) }
+        }
+    }
+}
+
+@Composable
+private fun LoadMoreFooter(state: CoinListState.Success, onRetry: () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth().padding(Dimens.SpacingLarge), contentAlignment = Alignment.Center) {
+        val error = state.loadMoreError
+        if (error == null) CircularProgressIndicator() else LoadErrorView(error, onRetry)
+    }
+}
+
+private const val LOAD_MORE_THRESHOLD = 5
 
 @Composable
 private fun SearchField(query: String, onQueryChange: (String) -> Unit) {

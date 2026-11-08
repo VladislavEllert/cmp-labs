@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,9 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.ellert.kriptan.domain.Coin
+import com.ellert.kriptan.domain.CoinDetail
 import com.ellert.kriptan.ui.common.ChangePill
 import com.ellert.kriptan.ui.common.CoinAvatar
+import com.ellert.kriptan.ui.common.LoadErrorView
 import com.ellert.kriptan.ui.format.formatCompact
 import com.ellert.kriptan.ui.format.formatDate
 import com.ellert.kriptan.ui.format.formatDateTime
@@ -36,7 +38,6 @@ import kriptan.shared.generated.resources.Res
 import kriptan.shared.generated.resources.all_time_high
 import kriptan.shared.generated.resources.back
 import kriptan.shared.generated.resources.circulating_supply
-import kriptan.shared.generated.resources.coin_not_found
 import kriptan.shared.generated.resources.high_24h
 import kriptan.shared.generated.resources.ic_arrow_back
 import kriptan.shared.generated.resources.last_updated
@@ -44,6 +45,7 @@ import kriptan.shared.generated.resources.low_24h
 import kriptan.shared.generated.resources.market_cap
 import kriptan.shared.generated.resources.max_supply
 import kriptan.shared.generated.resources.rank
+import kriptan.shared.generated.resources.section_about
 import kriptan.shared.generated.resources.section_market
 import kriptan.shared.generated.resources.section_supply
 import kriptan.shared.generated.resources.total_supply
@@ -54,11 +56,14 @@ import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CoinDetailScreen(coin: Coin?, onBack: () -> Unit) {
+fun CoinDetailScreen(state: CoinDetailState, onBack: () -> Unit, onRetry: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(coin?.name.orEmpty(), fontWeight = FontWeight.Bold) },
+                title = {
+                    val title = (state as? CoinDetailState.Success)?.detail?.coin?.name.orEmpty()
+                    Text(title, fontWeight = FontWeight.Bold)
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(painterResource(Res.drawable.ic_arrow_back), stringResource(Res.string.back))
@@ -67,18 +72,19 @@ fun CoinDetailScreen(coin: Coin?, onBack: () -> Unit) {
             )
         },
     ) { padding ->
-        if (coin == null) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text(stringResource(Res.string.coin_not_found))
+        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            when (state) {
+                CoinDetailState.Loading -> CircularProgressIndicator()
+                is CoinDetailState.Error -> LoadErrorView(state.error, onRetry)
+                is CoinDetailState.Success -> CoinDetails(state.detail)
             }
-        } else {
-            CoinDetails(coin, Modifier.padding(padding))
         }
     }
 }
 
 @Composable
-private fun CoinDetails(coin: Coin, modifier: Modifier = Modifier) {
+private fun CoinDetails(detail: CoinDetail, modifier: Modifier = Modifier) {
+    val coin = detail.coin
     val symbol = coin.symbol.uppercase()
     Column(
         modifier = modifier
@@ -123,6 +129,11 @@ private fun CoinDetails(coin: Coin, modifier: Modifier = Modifier) {
             InfoRow(Res.string.circulating_supply, "${formatCompact(coin.circulatingSupply)} $symbol")
             InfoRow(Res.string.total_supply, "${formatCompact(coin.totalSupply)} $symbol")
             InfoRow(Res.string.max_supply, "${formatCompact(coin.maxSupply)} $symbol")
+        }
+        detail.description?.let { description ->
+            InfoSection(Res.string.section_about) {
+                Text(description, style = MaterialTheme.typography.bodyMedium)
+            }
         }
         Text(
             text = stringResource(Res.string.last_updated, formatDateTime(coin.lastUpdated)),

@@ -21,4 +21,11 @@
     <string name="max_supply">Максимум</string>
     <string name="last_updated">Обновлено %1$s</string>
     <string name="coin_not_found">Монета не найдена</string>
+    <string name="retry">Повторить</string>
+    <string name="error_no_connection">Нет связи с сервером. Проверьте сеть и повторите.</string>
+    <string name="error_timeout">Сервер слишком долго не отвечает.</string>
+    <string name="error_too_many_requests">Слишком много запросов к CoinGecko. Подождите минуту и повторите.</string>
+    <string name="error_server">Ошибка сервера (%1$s).</string>
+    <string name="error_bad_response">Сервер прислал данные в неожиданном формате.</string>
+    <string name="section_about">О монете</string>
 </resources>
